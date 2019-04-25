@@ -1,11 +1,18 @@
+#ifndef CONTAINER_H_
+#define CONTAINER_H_
+
 #include <unordered_map>
 #include <math.h>
 #include <iostream>
 #include <vector> 
 
-inline struct vector_3d vector_norm(vector_3d vec);
-inline struct vector_3d vector_product(vector_3d vec_a, vector_3d vec_b);
-inline double scalar_product(vector_3d vec_a, vector_3d vec_b);
+inline struct Vector_3d vector_norm(Vector_3d vec);
+inline struct Vector_3d vector_product(Vector_3d vec_a, Vector_3d vec_b);
+inline double scalar_product(Vector_3d vec_a, Vector_3d vec_b);
+
+//struct Vector3dHash;
+
+double hash_step; //убрать из h файла
 
 struct Vector_3d 
 {
@@ -35,29 +42,9 @@ struct Wall
 	}
 };
 
-
-class experiment
-{
-	//вектор стен, вектор частиц
-	std::vector<Wall> walls;
-	std::vector<Particle> particles;
-	unordered_map<Vector_3d, Particle*> htable;
-public:
-
-	const double hash_step = 0.01;
-
-	void add_wall(Wall &wall);
-	//std::vector<wall> walls;	
-};
-
 struct Vector3dHash 
 {
-	inline bool operator==(Vector3d &p1, Vector3d &p2)
-	{
-		if (
-	}
-
-	inline std::size_t operator()(Vector3d &p) const
+	inline std::size_t operator()(Vector_3d &p) const
 	{
 		std::size_t x_h, y_h, z_h;
 		x_h = p.x / hash_step;
@@ -71,6 +58,21 @@ struct Vector3dHash
 		return x_h ^ y_h ^ z_h;
 	}
 };
+
+class experiment
+{
+	//вектор стен, вектор частиц
+	std::vector<Wall> walls;
+	std::vector<Particle> particles;
+	std::unordered_multimap<Vector_3d &, Particle &, Vector3dHash> htable;
+	void upd_hash_table();
+public:
+	void add_wall(Wall &wall);
+	void add_particles(Particle &particles);
+	void simulation();
+	//std::vector<wall> walls;	
+};
+
 
 
 inline double scalar_product(Vector_3d vec_a, Vector_3d vec_b)
@@ -99,3 +101,4 @@ inline struct Vector_3d vector_norm(Vector_3d vec)
 	return vec_n;	
 }
 
+#endif //CONTAINER_H_
