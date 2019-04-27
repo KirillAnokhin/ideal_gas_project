@@ -1,4 +1,4 @@
-CFLAGS = -Wall -g
+CFLAGS = -g -Wall
 OBJ = container.cpp main.cpp
 EXE = model
 

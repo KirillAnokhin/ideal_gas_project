@@ -17,6 +17,10 @@ double hash_step; //убрать из h файла
 struct Vector_3d 
 {
 	double x, y, z;
+	bool operator==(const Vector_3d & other) const
+	{
+		return ((x == other.x) && (y == other.y) && (z == other.z));
+	}	
 };
 
 struct Particle
@@ -58,6 +62,8 @@ struct Vector3dHash
 		return x_h ^ y_h ^ z_h;
 	}
 };
+
+
 
 class experiment
 {
