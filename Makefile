@@ -1,5 +1,5 @@
 CFLAGS = -g -Wall
-OBJ = container.cpp main.cpp
+OBJ = container.o main.o
 EXE = model
 
 all: $(EXE)
@@ -7,4 +7,4 @@ all: $(EXE)
 model: $(OBJ)
 	$(CXX) $(CFLAGS) $(OBJ) -o $(EXE)
 clean:
-	$(RM) $(OBJ) $(EXE)
+	$(RM) *.o

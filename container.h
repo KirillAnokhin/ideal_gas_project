@@ -6,17 +6,16 @@
 #include <iostream>
 #include <vector> 
 
+
 inline struct Vector_3d vector_norm(Vector_3d vec);
 inline struct Vector_3d vector_product(Vector_3d vec_a, Vector_3d vec_b);
 inline double scalar_product(Vector_3d vec_a, Vector_3d vec_b);
-
-//struct Vector3dHash;
-
-double hash_step; //убрать из h файла
+inline size_t get_hash(Vector_3d &vec); 
 
 struct Vector_3d 
 {
 	double x, y, z;
+	//size_t get_hash(Vector_3d &vec); //add instaed of operator() in functor
 	bool operator==(const Vector_3d & other) const
 	{
 		return ((x == other.x) && (y == other.y) && (z == other.z));
@@ -50,36 +49,23 @@ struct Vector3dHash
 {
 	inline std::size_t operator()(Vector_3d &p) const
 	{
-		std::size_t x_h, y_h, z_h;
-		x_h = p.x / hash_step;
-		y_h = p.y / hash_step;
-		z_h = p.z / hash_step;
-
-		x_h = std::hash<std::size_t>{}(x_h);
-		y_h = std::hash<std::size_t>{}(y_h);
-		z_h = std::hash<std::size_t>{}(z_h);
-
-		return x_h ^ y_h ^ z_h;
+		return get_hash(p);
 	}
 };
 
-
-
-class experiment
+class Experiment
 {
-	//вектор стен, вектор частиц
 	std::vector<Wall> walls;
 	std::vector<Particle> particles;
 	std::unordered_multimap<Vector_3d &, Particle &, Vector3dHash> htable;
 	void upd_hash_table();
+	void get_near_hashes(Vector_3d &vec, size_t *vector);
 public:
+	static constexpr double hash_step = 0.01;
 	void add_wall(Wall &wall);
 	void add_particles(Particle &particles);
 	void simulation();
-	//std::vector<wall> walls;	
 };
-
-
 
 inline double scalar_product(Vector_3d vec_a, Vector_3d vec_b)
 {
