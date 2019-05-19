@@ -1,5 +1,5 @@
 CFLAGS = -g -Wall
-OBJ = container.o main.o
+OBJ = experiment.o main.o
 EXE = model
 
 all: $(EXE)

@@ -2,99 +2,89 @@
 #include <iostream>
 #include <utility>
 #include <functional>
-#include "container.h"
+#include "experiment.h"
 
-
-inline double scalar_product(Vector_3d vec_a, Vector_3d vec_b)
+Experiment::Experiment(double cube_size_)
 {
-	double sc_pr = vec_a.x * vec_b.x +
-	       	vec_a.y * vec_b.y + vec_a.z * vec_b.z;
-	return sc_pr;
+	cube_size = cube_size_;
 }
 
-inline struct Vector_3d vector_product(Vector_3d vec_a, Vector_3d vec_b)
-{				
-	struct Vector_3d vec;
-	vec.x = vec_a.y * vec_b.z - vec_a.z * vec_b.y;
-	vec.y = vec_a.z * vec_b.x - vec_a.x * vec_b.z;
-	vec.z = vec_a.x * vec_b.y - vec_a.y * vec_b.x;
-	return vec;
-}
-
-inline struct Vector_3d vector_norm(Vector_3d vec)
+void get_line_x_buckets(Vector_3d::Cube &cube, size_t *buck, int &i)
 {
-	struct Vector_3d vec_n;
-	double norm = sqrt(vec.x*vec.x + vec.y*vec.y +vec.z*vec.z);
-	vec_n.x = vec.x/norm;
-	vec_n.y = vec.y/norm;
-	vec_n.z = vec.z/norm; 
-	return vec_n;	
-}
-
-void get_line_x_buckets(Vector_3d &vec, size_t *vector, int &i)
-{
-	vec.x -= Experiment::hash_step;
+	cube.x -= Experiment::cube_size;
 
 	for(int k = 0; k < 3; k++) {
-		vector[i] = get_hash(vec);
-		vec.x += Experiment::hash_step;
+		buck[i] = get_hash(cube);
+		cube.x += Experiment::cube_size;
 		i++;
 	}
 
-	vec.x -= Experiment::hash_step;		
+	cube.x -= Experiment::cube_size;		
 }
 
-void get_plane_xy_buckets(Vector_3d &vec, size_t *vector, int &i)
+void get_plane_xy_buckets(Vector_3d::Cube &cube, size_t *buck, int &i)
 {
-	vec.y -= Experiment::hash_step;
+	cube.y -= Experiment::cube_size;
 
 	for(int k = 0; k < 3; k++) {
-		get_line_x_hashes(vec, vector, i);
-		vec.y += Experiment::hash_step;;	
+		get_line_x_buckets(cube, buck, i);
+		cube.y += Experiment::cube_size;;	
 	}
 
-	vec.y -= Experiment::hash_step;;
+	cube.y -= Experiment::cube_size;;
 }
 
-void Experiment::get_near_buckets(Particle &p, size_t *vector)
+void Experiment::get_near_buckets(Particle &p, size_t *buck, int &i)
 {
 	auto cube = p.cube;
-	cube.x;
-	// buck size_type
-	// buck[i] = htable.bucket(cube);
 
-	int i = 0;
-	double step_size = Experiment::hash_step;
+	double size = Experiment::cube_size;
 
-	vec.z -= step_size;
+	cube.z -= size;
 
 	for(int k = 0; k < 3; k++) {
-		get_plane_xy_hashes(vec, vector, i);
-		vec.z += step_size;	
+		get_plane_xy_buckets(cube, buck, i);
+		cube.z += size;	
 	}
 
-	vec.y -= step_size;
+	cube.z -= size;
 }
 
 void Experiment::upd_hash_table()
 {
 	htable.clear();
-	for(auto & p : particles) {
+	for(auto &p : particles) {
 		p.set_cube();	
-		htable.insert(std::make_pair(p.cube, p));
+		//htable.insert(std::make_pair(p.cube, p));
+		htable.insert(std::pair<Vector_3d::Cube, Particle &>(p.cube, p));
 	}
 }
 
 void Experiment::simulation()
 {
+	int ptr = 0;
+	int &i = ptr;
 	upd_hash_table();
 	for(auto & p: particles) {
 		size_t buck[27];
-		get_near_buckets(p, buck);
-		for(int k = 0; k < 27; k++) {
-			//for(auto iter: htable[vector[k]]);
-		}		
+		i = 0;
+		get_near_buckets(p, buck, i);
+
+	
 	}	
 }
 
+void collision handler(size_t *buck)
+{
+	for(int k = 0; k < 27; k++) {
+		auto iter = htable.equal_range(buck[k]); //здесь вместо buck[k]
+								//нужен ключ типа cube, 
+								//а не size_t
+		for(auto it1 = iter.first; it1 != iter.second; it1++) {
+			for(auto it2 = it1 + 1; it < iter.second; it2++) {
+						
+			}	
+		}
+	}	
+}
 
