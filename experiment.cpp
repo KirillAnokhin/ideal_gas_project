@@ -5,6 +5,19 @@
 #include <functional>
 #include "experiment.h"
 
+inline double fast_abs(double val)
+{
+	if(val < 0)
+		return -val;
+	return val;
+}
+
+inline double fast_sign(double val)
+{
+	if(val >= 0)
+		return 1;
+	return -1;
+}
 
 void Experiment::p_htable_update()
 {
@@ -56,10 +69,39 @@ inline void Experiment::process_part_coll(Particle_3d *p1, Particle_3d *p2)
 	p2->r = p2->r - coll_time * v_ch;
 }
 
-inline void Experiment::process_wall_coll(Particle_3d *p)
+inline void Experiment::process_wall_coll(Wall_3d &w)
 {
-	//Vector_3d v_ch = ((-2) * scalar_product(p->v, n)) * n;
-	//p->v = p->v + v_ch;
+	
+	double sc_ab = scalar_product(w.a, w.b);
+	double sc_aa = scalar_product(w.a, w.a);
+	double sc_bb = scalar_product(w.b, w.b);
+	double det = sc_aa * sc_bb - sc_ab * sc_ab;
+	double c_bb = sc_bb/det;
+	double c_ab = sc_ab/det;
+	double c_aa = sc_aa/det;
+
+	for (auto &p : p_vector) {
+		Vector_3d r = p.r - w.r;
+		double sc_rn = scalar_product(r, w.n);
+		if(fast_abs(sc_rn) > wall_wdth) 
+			continue;
+		double sc_ra = scalar_product(r, w.a);
+		double sc_rb = scalar_product(r, w.b);
+		double r_a = sc_ra*c_bb - sc_rb*c_ab;
+		double r_b = sc_rb*c_aa - sc_ra*c_ab;
+		if(r_a < 0 || r_b < 0 || r_a > 1 || r_b > 1)
+			continue;
+		
+		double sc_vn = scalar_product(p.v, w.n);
+
+		Vector_3d v_ch = ((-2) * sc_vn) * w.n;		
+		Vector_3d r_ch = ((-2)*(fast_sign(sc_vn * sc_rn) * wall_wdth * fast_sign(sc_rn) + sc_rn))*w.n; 
+		
+		p.v = p.v + v_ch;
+		p.r = p.r + r_ch;
+
+		/* sum_p_imp += fast_abs(v_ch); */
+	}
 		
 }
 
@@ -74,7 +116,7 @@ void Experiment::simulate_step()
 	const size_t n_cubes = 27;
 	size_t buckets[n_cubes];
 
-	for (auto p : p_htable) {
+	for (auto &p : p_htable) {
 		set_buckets(p.first, buckets);
 		for (size_t i = 0; i < n_cubes; ++i) {
 			for (auto it = p_htable.begin(buckets[i]); it != p_htable.end(buckets[i]); it++) {
@@ -84,8 +126,13 @@ void Experiment::simulate_step()
 		}
 	}
 
-	for (auto p : p_htable)
+	for (auto &w : walls)
+		process_wall_coll(w);
+
+	for (auto &p : p_htable)
 		move_particle(p.second);
+
+	/* timer += time_step; */
 }
 
 

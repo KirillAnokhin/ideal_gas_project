@@ -138,20 +138,21 @@ struct Particle_3d
 
 struct Wall_3d
 {
-private:
-	struct Vector_3d vec_n; //|n| = 1
-public:
-	struct Vector_3d vec_r;
-	struct Vector_3d vec_a;
-	struct Vector_3d vec_b;
+friend class Experiment;
 
+private:
+	struct Vector_3d n; //|n| = 1
+	struct Vector_3d r;
+	struct Vector_3d a;
+	struct Vector_3d b;
+public:
 	
-	Wall_3d(Vector_3d vec_r_, Vector_3d vec_a_, Vector_3d vec_b_)
+	Wall_3d(Vector_3d r_, Vector_3d a_, Vector_3d b_)
 	{
-		vec_r = vec_r_;
-		vec_a = vec_a_;
-		vec_b = vec_b_;
-		vec_n = vector_norm(vector_product(vec_a_, vec_b_));
+		r = r_;
+		a = a_;
+		b = b_;
+		n = vector_norm(vector_product(a_, b_));
 	}
 };
 
@@ -168,10 +169,14 @@ class Experiment
 	double min_sc;
 	double cube_size;
 	const double wall_wdth_mult = 30;
+	double wall_wdth;
+
+	double timer;
+	double sum_p_imp;
 
 	inline void move_particle(Particle_3d *p);
 	inline void process_part_coll(Particle_3d *p1, Particle_3d *p2);
-	inline void process_wall_coll(Particle_3d *p);
+	inline void process_wall_coll(Wall_3d &w);
 	inline void set_buckets(const Vector_3d::Cube &c, size_t arr[27]);
 public:
 	Experiment() { ; }
@@ -180,11 +185,16 @@ public:
 	void add_wall(Wall_3d &wall) { walls.push_back(wall); }
 	void add_particle(Particle_3d &p) { p_vector.push_back(p); }
 	void set_time_step(double t) { time_step = t; }
-	void set_particle_r(double r) { particle_r = r; min_sc = 4 * r * r; }
+	void set_particle_r(double r) { particle_r = r; min_sc = 4 * r * r; wall_wdth = wall_wdth_mult * r; }
 	void set_cube_size(double s) { cube_size = s; }
 	
 	void simulate(size_t n_steps);
 	void simulate_step();
+
+	void reset_timer();
+
+	double meas_p();
+	void reset_meas_p();
 };
 
 #endif //EXPERIMENT_H_

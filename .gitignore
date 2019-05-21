@@ -1,0 +1,8 @@
+*
+*.*
+model
+!Makefile
+!.gitignore
+!.cpp
+!.h
+
