@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <functional>
 #include <utility>
+#include <cmath>
 
 
 struct Vector_3d 
@@ -21,6 +22,10 @@ struct Vector_3d
 		z = z_;
 	}
 
+	inline double get_mod()
+	{
+		return sqrt(scalar_product(*this, *this));
+	}
 	
 	struct Cube
 	{
@@ -242,10 +247,26 @@ public:
 	void simulate(size_t n_steps);
 	void simulate_step();
 
-	void reset_timer();
+	void reset_timer()
+	{
+		timer = 0;
+	}
 
-	double meas_p();
-	void reset_meas_p();
+	double meas_p()
+	{
+		reset_meas_p();
+		double s = 0;
+		for(auto &w : walls) {
+			s += (vector_product(w.a, w.b)).get_mod();
+		}
+		return sum_p_imp/(timer*s);
+	}
+
+	void reset_meas_p()
+	{
+		reset_timer();
+		sum_p_imp = 0;
+	}
 };
 
 #endif //EXPERIMENT_H_

@@ -100,7 +100,7 @@ inline void Experiment::process_wall_coll(Wall_3d &w)
 		p.v = p.v + v_ch;
 		p.r = p.r + r_ch;
 
-		/* sum_p_imp += fast_abs(v_ch); */
+		sum_p_imp += v_ch.get_mod(); 
 	}
 		
 }
@@ -132,7 +132,7 @@ void Experiment::simulate_step()
 	for (auto &p : p_htable)
 		move_particle(p.second);
 
-	/* timer += time_step; */
+	timer += time_step; 
 }
 
 
