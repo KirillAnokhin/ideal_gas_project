@@ -92,7 +92,7 @@ inline void Experiment::process_wall_coll(Wall_3d &w)
 		if(r_a < 0 || r_b < 0 || r_a > 1 || r_b > 1)
 			continue;
 		
-		double sc_vn = scalar_product(p.v, w.n);
+		double sc_vn = scalar_product(p.v - w.v, w.n); 
 
 		Vector_3d v_ch = ((-2) * sc_vn) * w.n;		
 		Vector_3d r_ch = ((-2)*(fast_sign(sc_vn * sc_rn) * wall_wdth * fast_sign(sc_rn) + sc_rn))*w.n; 

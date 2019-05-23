@@ -14,6 +14,14 @@ struct Vector_3d
 {
 	double x, y, z;
 
+	Vector_3d(double x_ = 0, double y_ = 0, double z_ = 0)  
+	{
+		x = x_;
+		y = y_;
+		z = z_;
+	}
+
+	
 	struct Cube
 	{
 		long x, y, z;
@@ -110,6 +118,7 @@ struct Vector_3d
 		vec_n.z = vec.z/norm; 
 		return vec_n;	
 	}
+
 };
 
 namespace std {
@@ -141,14 +150,16 @@ struct Wall_3d
 friend class Experiment;
 
 private:
+	struct Vector_3d v;
 	struct Vector_3d n; //|n| = 1
 	struct Vector_3d r;
 	struct Vector_3d a;
 	struct Vector_3d b;
 public:
 	
-	Wall_3d(Vector_3d r_, Vector_3d a_, Vector_3d b_)
+	Wall_3d(Vector_3d r_, Vector_3d a_, Vector_3d b_, Vector_3d v_)
 	{
+		v = v_;
 		r = r_;
 		a = a_;
 		b = b_;
@@ -182,11 +193,51 @@ public:
 	Experiment() { ; }
 	~Experiment();
 	
-	void add_wall(Wall_3d &wall) { walls.push_back(wall); }
-	void add_particle(Particle_3d &p) { p_vector.push_back(p); }
-	void set_time_step(double t) { time_step = t; }
-	void set_particle_r(double r) { particle_r = r; min_sc = 4 * r * r; wall_wdth = wall_wdth_mult * r; }
-	void set_cube_size(double s) { cube_size = s; }
+	void add_wall(Wall_3d &&wall)
+       	{
+	       	walls.push_back(wall);
+       	}
+
+	void add_particle(Particle_3d &&p)
+       	{
+	       	p_vector.push_back(p);
+       	}
+
+	void create_piston(double len, double wid, double heig)
+	{		
+		add_wall(Wall_3d(Vector_3d (-len/2, -wid/2, heig/2), Vector_3d (len, 0, 0), 
+				 Vector_3d (0, wid, 0), Vector_3d (0, 0, 0)));
+		add_wall(Wall_3d(Vector_3d (-len/2, -wid/2, -heig/2), Vector_3d(len, 0, 0), 
+				 Vector_3d (0, wid, 0), Vector_3d (0, 0, 0)));
+
+		add_wall(Wall_3d(Vector_3d (-len/2, -wid/2, heig/2), Vector_3d (0, wid, 0), 
+				 Vector_3d (0, 0, -heig), Vector_3d (0, 0, 0)));
+		add_wall(Wall_3d(Vector_3d (len/2, -wid/2, heig/2), Vector_3d (0, wid, 0), 
+				 Vector_3d (0, 0, -heig), Vector_3d (0, 0, 0)));
+	
+		add_wall(Wall_3d(Vector_3d (-len/2, -wid/2, heig/2), Vector_3d (len, 0, 0), 
+				 Vector_3d (0, 0, -heig), Vector_3d (0, 0, 0)));
+		add_wall(Wall_3d(Vector_3d (-len/2, wid/2, heig/2), Vector_3d (len, 0, 0), 
+				 Vector_3d (0, 0, -heig), Vector_3d (0, 0, 0)));
+
+	}
+	
+	void set_time_step(double t)
+       	{
+	       	time_step = t;
+       	}
+
+	void set_particle_r(double r)
+       	{
+	       	particle_r = r; 
+		min_sc = 4 * r * r; 
+		wall_wdth = wall_wdth_mult * r; 
+	}
+
+	void set_cube_size(double s)
+       	{
+	       	cube_size = s;
+       	}
 	
 	void simulate(size_t n_steps);
 	void simulate_step();
